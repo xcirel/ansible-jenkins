@@ -20,4 +20,68 @@
       update_cache: yes
       name: jenkins
       state: present
- 
+  - name: Get the initial key to access Jenkins
+    ansible.builtin.command: cat /var/lib/jenkins/secrets/initialAdminPassword
+    register: chave
+    ignore_errors: yes
+
+  - name: Show the initial key to access Jenkins
+    ansible.builtin.debug:
+      msg: "{{ chave.stdout }}"
+    when: chave.stdout != ""  
+
+- name: Install Docker
+  hosts: jenkins
+  remote_user: root
+  tasks:
+  - name: Install pre requirements
+    apt:
+      name: bash-completion, ca-certificates, curl, gnupg, lsb-release
+      state: present 
+  - name: Add the key of Docker repository 
+    ansible.builtin.apt_key:
+      url: https://download.docker.com/linux/ubuntu/gpg
+      state: present
+  - name: Add specified Docker repository into sources list
+    ansible.builtin.apt_repository:
+      repo: deb https://download.docker.com/linux/ubuntu bionic stable
+      state: present
+  - name: Install Docker
+    ansible.builtin.apt:
+      update_cache: yes
+      name: docker-ce, docker-ce-cli, containerd.io
+      state: present
+  - name: Add user jenkins in docker group
+    ansible.builtin.user:
+      append: yes
+      name: jenkins
+      groups: docker
+      state: present
+
+  - name: Restart Jenkins
+    ansible.builtin.service:
+      name: jenkins
+      state: restarted
+
+- name: Install Kubernets
+  hosts: jenkins
+  remote_user: root
+  tasks:
+  - name: Install package pre requisits
+    apt:
+      name: ca-certificates, curl
+      state: present
+  - name: Add the key Kubernets repository 
+    ansible.builtin.apt_key:
+      url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+      state: present
+  - name: Add specified Docker repository into sources list
+    ansible.builtin.apt_repository:
+      repo: deb https://apt.kubernetes.io kubernetes-xenial main
+      state: present
+      update_cache: yes
+  - name: Install Kubectl
+    ansible.builtin.apt:
+      update_cache: yes
+      name: kubectl
+      state: present
