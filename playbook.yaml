@@ -1,0 +1,23 @@
+- name: Install Jenkins
+  hosts: jenkins
+  remote_user: root
+  tasks:
+  - name: Install Java
+    ansible.builtin.apt:
+      update_cache: yes
+      name: openjdk-11-jdk
+      state: present
+  - name: Add key of Jenkins repository 
+    ansible.builtin.apt_key:
+      url: https://pkg.jenkins.io/debian-stable/jenkins.io.key
+      state: present
+  - name: Add specified Jenkins repository into sources list
+    ansible.builtin.apt_repository:
+      repo: deb https://pkg.jenkins.io/debian-stable binary/
+      state: present
+  - name: Install Jenkins
+    ansible.builtin.apt:
+      update_cache: yes
+      name: jenkins
+      state: present
+ 
