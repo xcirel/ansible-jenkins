@@ -1,6 +1,8 @@
-[jenkins]
-24.199.66.172
+[docker]
+10.0.2.15
+10.0.2.16
+10.0.2.17
 
-[jenkins:vars]
+[docker:vars]
 ansible_ssh_private_key_file=~/.ssh/id_rsa
 ansible_user=root
